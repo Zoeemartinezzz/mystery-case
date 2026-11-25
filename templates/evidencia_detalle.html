@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Evidencia #{{ ev.id_evidencia }} · Mystery Case{% endblock %}
+{% block content %}
+<header class="cabecera">
+  <div><h1>{{ ev.descripcion }}</h1>
+  <p>Evidencia nº {{ ev.id_evidencia }} · <span class="tag tag-{{ ev.tipo|lower }}">{{ ev.tipo.capitalize() }}</span> · Recogida el {{ ev.fecha_recogida }}{% if ev.ubicacion %} en {{ ev.ubicacion }}{% endif %}</p></div>
+  <div class="botones">
+    <a class="btn secundario" href="/evidencias/{{ ev.id_evidencia }}/editar">Editar</a>
+    <form method="post" action="/evidencias/{{ ev.id_evidencia }}/eliminar" onsubmit="return confirm('¿Eliminar esta evidencia?')"><button class="btn peligro">Eliminar</button></form>
+  </div>
+</header>
+
+<div class="dos">
+<section class="ficha">
+  <h2 class="pestana">Casos vinculados</h2>
+  <div class="cuerpo">
+    {% for c in casos_ev %}<div class="item"><a href="/casos/{{ c.id_caso }}">#{{ c.id_caso }} · {{ c.titulo }}</a><span class="tag tag-{{ c.estado|lower }}">{{ c.estado.capitalize() }}</span></div>
+    {% else %}<p class="vacio">Sin casos vinculados.</p>{% endfor %}
+  </div>
+</section>
+
+<section class="ficha">
+  <h2 class="pestana">Sospechosos relacionados</h2>
+  <div class="cuerpo">
+    {% for s in sospechosos_ev %}
+    <div class="item"><div>{{ s.nombre }}<small>{{ s.observaciones or '' }}</small></div>
+      <form method="post" action="/evidencias/{{ ev.id_evidencia }}/sospechoso/{{ s.id_sospechoso }}/eliminar"><button class="enlace peligro">Quitar</button></form></div>
+    {% else %}<p class="vacio">Ningún sospechoso relacionado.</p>{% endfor %}
+    {% if libres %}
+    <form method="post" action="/evidencias/{{ ev.id_evidencia }}/sospechoso" class="en-linea acciones-bloque">
+      <select name="id_sospechoso" aria-label="Sospechoso">{% for v, t in libres %}<option value="{{ v }}">{{ t }}</option>{% endfor %}</select>
+      <input name="observaciones" placeholder="Observaciones" aria-label="Observaciones">
+      <button class="btn secundario">Relacionar</button>
+    </form>{% endif %}
+  </div>
+</section>
+</div>
+
+<section class="ficha">
+  <h2 class="pestana">Análisis</h2>
+  <div class="cuerpo">
+    {% for a in analisis %}
+    <div class="item"><div><strong>{{ a.tipo_analisis }}</strong> · {{ a.fecha_analisis }} · {{ a.analista }}<small>{{ a.resultado }}</small></div>
+      <form method="post" action="/evidencias/{{ ev.id_evidencia }}/analisis/{{ a.id_analisis }}/eliminar" onsubmit="return confirm('¿Eliminar el análisis?')"><button class="enlace peligro">Eliminar</button></form></div>
+    {% else %}<p class="vacio">Esta evidencia todavía no ha sido analizada.</p>{% endfor %}
+    <form method="post" action="/evidencias/{{ ev.id_evidencia }}/analisis" class="formulario acciones-bloque">
+      <label>Tipo de análisis<input name="tipo_analisis" required></label>
+      <label>Resultado<textarea name="resultado" rows="3" required></textarea></label>
+      <label>Fecha<input type="date" name="fecha_analisis" value="{{ hoy }}" required></label>
+      <div class="botones"><button class="btn">Registrar análisis</button></div>
+    </form>
+  </div>
+</section>
+{% endblock %}

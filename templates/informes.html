@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Informes · Mystery Case{% endblock %}
+{% block content %}
+<header class="cabecera"><h1>Informes</h1><p>Consultas SQL avanzadas sobre el modelo.</p></header>
+{% for r in resultados %}
+<section class="ficha">
+  <h2 class="pestana">{{ loop.index }}. {{ r.titulo }}</h2>
+  <div class="cuerpo">
+    <p class="nota">{{ r.tecnica }}</p>
+    <details><summary>Ver sentencia SQL</summary><pre>{{ r.sql }}</pre></details>
+    <div class="tabla-scroll">
+    {% if r.filas %}
+    <table><thead><tr>{% for c in r.columnas %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+    <tbody>{% for f in r.filas %}<tr>{% for c in r.columnas %}<td>{{ f[c] if f[c] is not none else '—' }}</td>{% endfor %}</tr>{% endfor %}</tbody></table>
+    {% else %}<p class="vacio">La consulta no devuelve filas.</p>{% endif %}
+    </div>
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

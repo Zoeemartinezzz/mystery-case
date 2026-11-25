@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Mystery Case{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if user %}
+<div class="shell">
+  <aside class="rail">
+    <a class="brand" href="/dashboard">Mystery Case</a>
+    <nav>
+      {% for label, href in NAV %}
+      <a href="{{ href }}" class="{{ 'on' if request.path == href or (href != '/dashboard' and request.path.startswith(href + '/')) else '' }}">{{ label }}</a>
+      {% endfor %}
+    </nav>
+    <div class="who">
+      <strong>{{ user.nombre }} {{ user.apellidos }}</strong>
+      <span>{{ user.rango }} · {{ 'Administrador' if user.rol == 'ADMIN' else 'Investigador' }}</span>
+      <a href="/salir">Cambiar de usuario</a>
+    </div>
+  </aside>
+  <main>
+    {% include "_flash.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+<main class="solo">
+  {% include "_flash.html" %}
+  {% block solo %}{% endblock %}
+</main>
+{% endif %}
+</body>
+</html>

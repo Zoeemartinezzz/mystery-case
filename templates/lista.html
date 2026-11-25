@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} · Mystery Case{% endblock %}
+{% block content %}
+<header class="cabecera">
+  <h1>{{ titulo }}</h1>
+  {% if nuevo %}<a class="btn" href="{{ nuevo }}">Añadir</a>{% endif %}
+</header>
+{% if filtros %}
+<nav class="filtros">{% for etiqueta, href in filtros %}<a href="{{ href }}" class="{{ 'on' if request.full_path.rstrip('?') == href else '' }}">{{ etiqueta }}</a>{% endfor %}</nav>
+{% endif %}
+<section class="ficha"><div class="cuerpo tabla-scroll">
+{% if rows %}
+<table>
+  <thead><tr>{% for key, label in cols %}<th>{{ label }}</th>{% endfor %}{% if editar or borrar %}<th></th>{% endif %}</tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr>
+    {% for key, label in cols %}
+    <td>
+      {% if key in ['estado','prioridad','tipo','rol'] %}<span class="tag tag-{{ r[key]|lower }}">{{ r[key].capitalize() }}</span>
+      {% elif detalle and loop.index == 2 %}<a href="/{{ base }}/{{ r[id_key] }}">{{ r[key] }}</a>
+      {% else %}{{ r[key] if r[key] is not none else '—' }}{% endif %}
+    </td>
+    {% endfor %}
+    {% if editar or borrar %}
+    <td class="acciones">
+      {% if editar %}<a href="/{{ base }}/{{ r[id_key] }}/editar">Editar</a>{% endif %}
+      {% if borrar %}<form method="post" action="/{{ base }}/{{ r[id_key] }}/eliminar" onsubmit="return confirm('¿Eliminar el registro nº {{ r[id_key] }}?')"><button class="enlace peligro">Eliminar</button></form>{% endif %}
+    </td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="vacio">{{ vacio }}</p>{% endif %}
+</div></section>
+{% endblock %}

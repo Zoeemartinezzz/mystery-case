@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Elegir usuario · Mystery Case{% endblock %}
+{% block solo %}
+<section class="entrada">
+  <h1>Mystery Case</h1>
+  <p class="lead">Sistema de gestión de investigaciones criminales. Elige con qué usuario quieres trabajar.</p>
+  <form method="post" class="usuarios">
+    {% for u in usuarios %}
+    <button name="uid" value="{{ u.id_investigador }}" class="usuario">
+      <span class="nombre">{{ u.nombre }} {{ u.apellidos }}</span>
+      <span class="meta">{{ u.rango }}{% if u.especialidad %} · {{ u.especialidad }}{% endif %}</span>
+      <span class="tag tag-{{ u.rol|lower }}">{{ 'Administrador' if u.rol == 'ADMIN' else 'Investigador' }}</span>
+    </button>
+    {% else %}
+    <p>No hay usuarios activos. Carga los datos con sql/03_datos_ejemplo.sql.</p>
+    {% endfor %}
+  </form>
+</section>
+{% endblock %}

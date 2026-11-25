@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} · Mystery Case{% endblock %}
+{% block content %}
+<header class="cabecera"><h1>{{ titulo }}</h1></header>
+<section class="ficha estrecha">
+  <h2 class="pestana">Datos</h2>
+  <form method="post" class="cuerpo formulario">
+    {% if aviso %}<p class="nota">{{ aviso }}</p>{% endif %}
+    {% for c in campos %}
+    <label>{{ c.label }}{% if c.required %} *{% endif %}
+      {% if c.type == 'textarea' %}<textarea name="{{ c.name }}" rows="4" {{ 'required' if c.required }}>{{ c.value }}</textarea>
+      {% elif c.type == 'select' %}
+        <select name="{{ c.name }}" {{ 'required' if c.required }}>
+          {% if c.required and c.value == '' %}<option value="" disabled selected>Elige una opción</option>{% endif %}
+          {% for val, texto in c.options %}<option value="{{ val }}" {{ 'selected' if val|string == c.value|string }}>{{ texto }}</option>{% endfor %}
+        </select>
+      {% else %}<input type="{{ c.type }}" name="{{ c.name }}" value="{{ c.value }}" {{ 'required' if c.required }}>{% endif %}
+    </label>
+    {% endfor %}
+    <div class="botones"><button class="btn">{{ boton }}</button><a href="{{ volver }}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,3 @@
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% for cat, msg in mensajes %}<div class="aviso aviso-{{ cat }}" role="alert">{{ msg }}</div>{% endfor %}
+{% endwith %}

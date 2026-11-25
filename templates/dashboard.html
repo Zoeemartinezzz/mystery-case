@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Mystery Case{% endblock %}
+{% block content %}
+<header class="cabecera"><h1>Dashboard</h1><p>Resumen de las investigaciones en curso.</p></header>
+
+<section class="cifras">
+  <a href="/casos?estado=ABIERTO"><b>{{ por_estado.ABIERTO }}</b>Casos abiertos</a>
+  <a href="/casos?estado=RESUELTO"><b>{{ por_estado.RESUELTO }}</b>Casos resueltos</a>
+  <a href="/casos?estado=PENDIENTE"><b>{{ por_estado.PENDIENTE }}</b>Casos pendientes</a>
+  <a href="/evidencias"><b>{{ total_evidencias }}</b>Pruebas registradas</a>
+  <a href="/casos" class="critica"><b>{{ criticas }}</b>Incidencias críticas</a>
+  <div><b>{{ porcentaje }}%</b>Tasa de resolución</div>
+</section>
+
+<div class="dos">
+  <section class="ficha">
+    <h2 class="pestana">Casos por estado</h2>
+    <div class="cuerpo barras">
+      {% for estado, n in por_estado.items() %}
+      <div class="barra">
+        <span>{{ estado.capitalize() }}</span>
+        <div class="pista"><i class="b-{{ estado|lower }}" style="width: {{ (n / maximo * 100)|round }}%"></i></div>
+        <em>{{ n }}</em>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="ficha">
+    <h2 class="pestana">Últimas actualizaciones</h2>
+    <ul class="cuerpo actividad">
+      {% for a in actividad %}
+      <li><a href="/casos/{{ a.id_caso }}">{{ a.titulo }}</a><span>{{ a.descripcion }}</span><time>{{ a.fecha }}</time></li>
+      {% else %}<li>Sin actividad todavía.</li>{% endfor %}
+    </ul>
+  </section>
+</div>
+
+<section class="ficha">
+  <h2 class="pestana">Investigaciones recientes</h2>
+  <div class="cuerpo tabla-scroll">
+    <table>
+      <thead><tr><th>Nº</th><th>Investigación</th><th>Estado</th><th>Prioridad</th><th>Responsable</th><th>Pruebas</th><th>Apertura</th></tr></thead>
+      <tbody>
+      {% for c in recientes %}
+      <tr>
+        <td>{{ c.id_caso }}</td>
+        <td><a href="/casos/{{ c.id_caso }}">{{ c.titulo }}</a></td>
+        <td><span class="tag tag-{{ c.estado|lower }}">{{ c.estado.capitalize() }}</span></td>
+        <td><span class="tag tag-{{ c.prioridad|lower }}">{{ c.prioridad.capitalize() }}</span></td>
+        <td>{{ c.investigador }}</td><td>{{ c.evidencias }}</td><td>{{ c.fecha_apertura }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

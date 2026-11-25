@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Caso #{{ caso.id_caso }} · Mystery Case{% endblock %}
+{% block content %}
+{% set cerrado = caso.estado == 'RESUELTO' %}
+<header class="cabecera">
+  <div>
+    <h1>{{ caso.titulo }}</h1>
+    <p>Caso nº {{ caso.id_caso }} · {{ caso.lugar or 'Lugar sin indicar' }} · Responsable: {{ caso.investigador }}</p>
+  </div>
+  <div class="botones">
+    <a class="btn secundario" href="/casos/{{ caso.id_caso }}/editar">Editar</a>
+    <form method="post" action="/casos/{{ caso.id_caso }}/eliminar" onsubmit="return confirm('¿Eliminar esta investigación y sus vínculos?')"><button class="btn peligro">Eliminar</button></form>
+  </div>
+</header>
+
+<section class="ficha">
+  <h2 class="pestana">Expediente</h2>
+  <div class="cuerpo expediente">
+    <p>{{ caso.descripcion or 'Sin descripción.' }}</p>
+    <dl>
+      <div><dt>Estado</dt><dd><span class="tag tag-{{ caso.estado|lower }}">{{ caso.estado.capitalize() }}</span></dd></div>
+      <div><dt>Prioridad</dt><dd><span class="tag tag-{{ caso.prioridad|lower }}">{{ caso.prioridad.capitalize() }}</span></dd></div>
+      <div><dt>Apertura</dt><dd>{{ caso.fecha_apertura }}</dd></div>
+      <div><dt>Cierre</dt><dd>{{ caso.fecha_cierre or '—' }}</dd></div>
+      <div><dt>Pruebas</dt><dd>{{ caso.n_evidencias }}</dd></div>
+    </dl>
+    <form method="post" action="/casos/{{ caso.id_caso }}/estado" class="en-linea">
+      <label>Cambiar estado
+        <select name="estado">{% for e in ESTADOS %}<option value="{{ e }}" {{ 'selected' if e == caso.estado }}>{{ e.capitalize() }}</option>{% endfor %}</select>
+      </label>
+      <button class="btn">Actualizar estado</button>
+    </form>
+  </div>
+</section>
+
+{% if cerrado %}<p class="aviso aviso-info">Caso resuelto: no admite nuevas evidencias, sospechosos ni declaraciones. Para modificarlo, reábrelo cambiando el estado.</p>{% endif %}
+
+<div class="dos">
+<section class="ficha">
+  <h2 class="pestana">Evidencias</h2>
+  <div class="cuerpo">
+    {% for e in evidencias %}
+    <div class="item">
+      <div><a href="/evidencias/{{ e.id_evidencia }}">#{{ e.id_evidencia }} · {{ e.descripcion }}</a>
+        <small><span class="tag tag-{{ e.tipo|lower }}">{{ e.tipo.capitalize() }}</span> {{ e.fecha_recogida }}</small></div>
+      <form method="post" action="/casos/{{ caso.id_caso }}/desvincular-evidencia/{{ e.id_evidencia }}"><button class="enlace peligro">Desvincular</button></form>
+    </div>
+    {% else %}<p class="vacio">Sin evidencias registradas.</p>{% endfor %}
+    {% if not cerrado %}
+    <div class="acciones-bloque">
+      <a class="btn" href="/evidencias/nueva?caso={{ caso.id_caso }}">Registrar evidencia</a>
+      {% if libres_ev %}
+      <form method="post" action="/casos/{{ caso.id_caso }}/vincular-evidencia" class="en-linea">
+        <select name="id_evidencia" aria-label="Evidencia existente">{% for v, t in libres_ev %}<option value="{{ v }}">{{ t }}</option>{% endfor %}</select>
+        <button class="btn secundario">Vincular existente</button>
+      </form>{% endif %}
+    </div>{% endif %}
+  </div>
+</section>
+
+<section class="ficha">
+  <h2 class="pestana">Sospechosos</h2>
+  <div class="cuerpo">
+    {% for s in sospechosos %}
+    <div class="item">
+      <div>{{ s.nombre }} {{ s.apellidos }}{% if s.alias %} «{{ s.alias }}»{% endif %}
+        <small>Sospecha <span class="tag tag-{{ s.nivel_sospecha|lower }}">{{ s.nivel_sospecha.capitalize() }}</span></small></div>
+      <form method="post" action="/casos/{{ caso.id_caso }}/desvincular-sospechoso/{{ s.id_sospechoso }}"><button class="enlace peligro">Retirar</button></form>
+    </div>
+    {% else %}<p class="vacio">Sin sospechosos.</p>{% endfor %}
+    {% if not cerrado %}
+    <div class="acciones-bloque">
+      <a class="btn" href="/sospechosos/nuevo?caso={{ caso.id_caso }}">Registrar sospechoso</a>
+      {% if libres_sp %}
+      <form method="post" action="/casos/{{ caso.id_caso }}/vincular-sospechoso" class="en-linea">
+        <select name="id_sospechoso" aria-label="Sospechoso existente">{% for v, t in libres_sp %}<option value="{{ v }}">{{ t }}</option>{% endfor %}</select>
+        <select name="nivel_sospecha" aria-label="Nivel de sospecha">{% for n in NIVELES %}<option {{ 'selected' if n == 'MEDIO' }} value="{{ n }}">{{ n.capitalize() }}</option>{% endfor %}</select>
+        <button class="btn secundario">Incorporar existente</button>
+      </form>{% endif %}
+    </div>{% endif %}
+  </div>
+</section>
+</div>
+
+<section class="ficha">
+  <h2 class="pestana">Declaraciones</h2>
+  <div class="cuerpo">
+    {% for d in declaraciones %}
+    <blockquote><p>{{ d.texto }}</p><footer>{{ d.testigo }} · {{ d.fecha_declaracion }}</footer></blockquote>
+    {% else %}<p class="vacio">Sin declaraciones.</p>{% endfor %}
+    {% if not cerrado %}<div class="acciones-bloque"><a class="btn" href="/declaraciones/nueva?caso={{ caso.id_caso }}">Registrar declaración</a></div>{% endif %}
+  </div>
+</section>
+
+<section class="ficha">
+  <h2 class="pestana">Historial de actividad</h2>
+  <ul class="cuerpo actividad">
+    {% for h in historial %}<li><span class="tag tag-hist">{{ h.tipo_evento.capitalize() }}</span><span>{{ h.descripcion }}</span><time>{{ h.fecha }}</time></li>
+    {% else %}<li>Sin actividad.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

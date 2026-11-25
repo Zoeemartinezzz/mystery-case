@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block solo %}
+<section class="entrada">
+  <h1>No se pudo conectar con la base de datos</h1>
+  <p class="lead">{{ msg }}</p>
+  <p>Revisa que MySQL esté en marcha, que hayas ejecutado los scripts de la carpeta <code>sql/</code> y que los datos del fichero <code>.env</code> sean correctos.</p>
+</section>
+{% endblock %}
