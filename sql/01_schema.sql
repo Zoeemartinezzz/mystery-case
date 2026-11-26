@@ -1,6 +1,6 @@
 -- =====================================================================
 -- MYSTERY CASE · 01_schema.sql · DDL del modelo físico (SQL Server / T-SQL)
--- Se ejecuta con:  python setup_db.py   (entiende las líneas GO)
+
 -- =====================================================================
 USE master;
 IF DB_ID('mystery_case') IS NOT NULL
@@ -9,9 +9,9 @@ BEGIN
   DROP DATABASE mystery_case;
 END;
 CREATE DATABASE mystery_case COLLATE Modern_Spanish_CI_AS;
-GO
+
 USE mystery_case;
-GO
+
 
 -- 1. INVESTIGADOR (también actúa como "usuario" del sistema)
 CREATE TABLE INVESTIGADOR (
@@ -153,4 +153,4 @@ CREATE TABLE HISTORIAL_CASO (
   CONSTRAINT fk_hist_caso FOREIGN KEY (id_caso) REFERENCES CASO (id_caso) ON DELETE CASCADE
 );
 CREATE INDEX ix_historial_caso ON HISTORIAL_CASO (id_caso, fecha);
-GO
+
