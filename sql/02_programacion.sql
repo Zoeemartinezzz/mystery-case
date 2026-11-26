@@ -6,10 +6,10 @@
 -- e INSTEAD OF, que cumplen la misma función de validación.
 -- =====================================================================
 USE mystery_case;
-GO
+
 
 -- ===================== FUNCIONES =====================
--- Ejemplo: SELECT dbo.fn_total_evidencias_caso(1);
+
 CREATE OR ALTER FUNCTION dbo.fn_total_evidencias_caso (@p_id_caso INT)
 RETURNS INT
 AS
@@ -18,7 +18,7 @@ BEGIN
   SELECT @total = COUNT(*) FROM CASO_EVIDENCIA WHERE id_caso = @p_id_caso;
   RETURN @total;
 END;
-GO
+
 
 CREATE OR ALTER FUNCTION dbo.fn_porcentaje_casos_resueltos ()
 RETURNS DECIMAL(5,2)
@@ -31,15 +31,12 @@ BEGIN
   IF @total = 0 RETURN 0;
   RETURN ROUND(@resueltos * 100.0 / @total, 2);
 END;
-GO
+
 
 -- ===================== PROCEDIMIENTOS =====================
 -- sp_registrar_evidencia: 1) el caso existe 2) está abierto 3) inserta
 -- 4) vincula 5) devuelve el id (parámetro OUTPUT)
--- Ejemplo:
---   DECLARE @id INT;
---   EXEC sp_registrar_evidencia 1, 'FISICA', N'Guante', '2026-03-01', N'Almacén', @id OUTPUT;
---   SELECT @id;
+
 CREATE OR ALTER PROCEDURE sp_registrar_evidencia
   @p_id_caso      INT,
   @p_tipo         VARCHAR(20),
@@ -74,7 +71,7 @@ BEGIN
     THROW;
   END CATCH
 END;
-GO
+
 
 -- sp_cerrar_caso: 1) existe 2) no cerrado 3) tiene evidencias
 -- 4) estado = RESUELTO 5) fecha de cierre.   Ejemplo: EXEC sp_cerrar_caso 1;
@@ -107,7 +104,7 @@ BEGIN
     THROW;
   END CATCH
 END;
-GO
+
 
 -- sp_registrar_sospechoso: 1) el caso existe 2) admite incorporaciones
 -- 3) registra al sospechoso 4) lo vincula al caso
@@ -147,7 +144,7 @@ BEGIN
     THROW;
   END CATCH
 END;
-GO
+
 
 -- ===================== TRIGGERS =====================
 -- Impide pasar un caso a RESUELTO si no tiene evidencias.
@@ -167,7 +164,7 @@ BEGIN
     THROW 50002, N'No se puede cerrar un caso sin evidencias registradas.', 1;
   END
 END;
-GO
+
 
 -- Fija la fecha de cierre al pasar a RESUELTO; la borra si se reabre.
 CREATE OR ALTER TRIGGER trg_fecha_cierre
@@ -189,7 +186,7 @@ BEGIN
     JOIN inserted i ON i.id_caso = c.id_caso
    WHERE i.estado <> 'RESUELTO' AND c.fecha_cierre IS NOT NULL;
 END;
-GO
+
 
 -- Impide registrar declaraciones en casos inexistentes o cerrados.
 CREATE OR ALTER TRIGGER trg_validar_declaracion
@@ -211,7 +208,7 @@ BEGIN
     THROW 50003, N'El caso está cerrado: no admite nuevas declaraciones.', 1;
   END
 END;
-GO
+
 
 -- Protege las evidencias de casos resueltos frente a borrados.
 CREATE OR ALTER TRIGGER trg_proteger_evidencia
@@ -230,7 +227,7 @@ BEGIN
   END
   DELETE e FROM EVIDENCIA e JOIN deleted d ON d.id_evidencia = e.id_evidencia;
 END;
-GO
+
 
 -- ---- Triggers de auditoría: alimentan HISTORIAL_CASO (RF10) ----
 CREATE OR ALTER TRIGGER trg_hist_caso_alta
@@ -243,7 +240,7 @@ BEGIN
   SELECT id_caso, 'APERTURA', CONCAT(N'Caso abierto con prioridad ', prioridad, N'.')
     FROM inserted;
 END;
-GO
+
 
 CREATE OR ALTER TRIGGER trg_hist_caso_cambios
 ON CASO
@@ -261,7 +258,7 @@ BEGIN
     FROM inserted i JOIN deleted d ON d.id_caso = i.id_caso
    WHERE i.prioridad <> d.prioridad;
 END;
-GO
+
 
 CREATE OR ALTER TRIGGER trg_hist_evidencia
 ON CASO_EVIDENCIA
@@ -273,7 +270,7 @@ BEGIN
   SELECT id_caso, 'EVIDENCIA', CONCAT(N'Evidencia #', id_evidencia, N' vinculada al caso.')
     FROM inserted;
 END;
-GO
+
 
 CREATE OR ALTER TRIGGER trg_hist_sospechoso
 ON SOSPECHOSO_CASO
@@ -286,7 +283,7 @@ BEGIN
          CONCAT(N'Sospechoso #', id_sospechoso, N' incorporado (nivel ', nivel_sospecha, N').')
     FROM inserted;
 END;
-GO
+
 
 CREATE OR ALTER TRIGGER trg_hist_declaracion
 ON DECLARACION
@@ -298,9 +295,9 @@ BEGIN
   SELECT id_caso, 'DECLARACION', CONCAT(N'Declaración registrada del testigo #', id_testigo, N'.')
     FROM inserted;
 END;
-GO
+
 
 -- Que las validaciones se ejecuten antes que los triggers de historial
 EXEC sp_settriggerorder @triggername = 'trg_cerrar_caso',        @order = 'First', @stmttype = 'UPDATE';
 EXEC sp_settriggerorder @triggername = 'trg_validar_declaracion', @order = 'First', @stmttype = 'INSERT';
-GO
+
